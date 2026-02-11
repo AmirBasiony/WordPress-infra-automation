@@ -7,7 +7,7 @@ locals {
         groups   = [
           "system:bootstrappers",
           "system:nodes"
-        ]y
+        ]
       },
       {
         rolearn  = data.aws_iam_role.github_actions_role.arn # the ARN of the IAM (CI/CD role identity)
