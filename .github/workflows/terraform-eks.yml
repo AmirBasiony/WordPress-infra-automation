@@ -42,7 +42,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -out tfplan -input=false -var var.TF_VAR_user_for_FullAdminAccess -var var.TF_VAR_user_for_Admin_role -var TF_VAR_user_for_Dev_role
+        run: terraform plan -out tfplan -input=false -no-color
         env:
           TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
           TF_VAR_user_for_Admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
@@ -50,9 +50,9 @@ jobs:
 
       - name: Terraform Apply (main only)
         if: github.ref == 'refs/heads/main'
-        # working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve tfplan -var var.TF_VAR_user_for_FullAdminAccess -var var.TF_VAR_user_for_Admin_role -var TF_VAR_user_for_Dev_role
+        run: terraform apply -input=false -auto-approve tfplan
         env:
           TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
           TF_VAR_user_for_Admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
           TF_VAR_user_for_Dev_role: ${{ secrets.TF_USER_FOR_DEV_ROLE }}
+
