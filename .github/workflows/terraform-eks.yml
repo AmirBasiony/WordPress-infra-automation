@@ -43,7 +43,7 @@ jobs:
 
       - name: Terraform Plan
         # working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -out tfplan
+        run: terraform plan -lock=false -out tfplan
 
       - name: Terraform Apply (main only)
         if: github.ref == 'refs/heads/main'
