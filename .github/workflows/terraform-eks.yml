@@ -20,10 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      # Set up Terraform (version 1.6.0 or higher)
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2  # Use v2 for the latest version support
         with:
-          terraform_version: 1.6.6
+          terraform_version: ">= 1.6.0"  # Ensure the version is at least 1.6.0
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

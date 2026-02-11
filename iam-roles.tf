@@ -114,7 +114,7 @@ resource "aws_eks_access_entry" "Full_role_admin_Access" {
 
   depends_on = [module.eks]
   tags = {
-    App = var.tags
+    App = "amir-wordpress-eks-cluster"
   }
 }
 resource "aws_eks_access_policy_association" "role_admin_cluster_policy" {
@@ -135,7 +135,7 @@ resource "aws_eks_access_entry" "Full_user_admin_Access" {
 
   depends_on = [module.eks]
   tags = {
-    App = var.tags
+    App = "amir-wordpress-eks-cluster"
   }
 }
 resource "aws_eks_access_policy_association" "user_admin_cluster_policy" {
