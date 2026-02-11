@@ -52,7 +52,8 @@ module "eks" {
   cluster_name                   = var.name
   cluster_version                = var.k8s_version
   cluster_endpoint_public_access = true
-  
+  enable_cluster_creator_admin_permissions = true
+
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
