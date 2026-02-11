@@ -11,9 +11,6 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  TF_IN_AUTOMATION: "true"
-  TF_INPUT: "false"
-  TF_WORKING_DIR: infra-automation-eks
 
 jobs:
   terraform:
@@ -35,18 +32,18 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -out tfplan
 
       - name: Terraform Apply (main only)
         if: github.ref == 'refs/heads/main'
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve tfplan
