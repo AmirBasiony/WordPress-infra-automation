@@ -1,0 +1,128 @@
+stages:
+  - init 
+  - test  
+  - build  
+  - deploy
+  - destroy
+
+# cache to speed up init across pipelines
+cache:
+  key: terraform-cache
+  paths:
+    - .terraform
+    - .terraform.lock.hcl
+
+# Define a reusable template
+.aws_oidc_auth:
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud:  https://gitlab.com
+  before_script:
+    # Use AWS CLI to assume the role with the web identity token provided by GitLab
+    # This will retrieve temporary AWS credentials that can be used in subsequent steps
+    # The credentials will be exported as environment variables for use in the job
+    # The duration is set to 3600 seconds (1 hour) for the temporary credentials
+    - >
+      export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"
+      $(aws sts assume-role-with-web-identity
+      --role-arn "${ROLE_ARN}"
+      --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
+      --web-identity-token "${GITLAB_OIDC_TOKEN}"
+      --duration-seconds 3600
+      --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
+      --output text))
+    - aws sts get-caller-identity
+
+.init:
+  tags:
+    - ec2
+    - shell
+  stage: init
+  extends: .aws_oidc_auth
+  script:
+    - terraform init --upgrade
+  artifacts:
+    when: always
+    paths:
+      - .terraform
+      - .terraform.lock.hcl
+
+
+.validate:
+  tags:
+    - ec2
+    - shell
+  stage: test
+  script:
+    - terraform validate
+  allow_failure: true
+
+.tfsec:
+  stage: test
+  image:
+    name: aquasec/tfsec:v1.28.14
+    entrypoint: [ "" ]
+  script:
+    - tfsec . --format json --out tfsec.json  
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - tfsec.json
+
+# This GitLab CI/CD pipeline is designed to automate the infrastructure provisioning and security scanning for an EKS cluster using Terraform.
+# Security scanning jobs to identify vulnerabilities and secrets in the codebase
+.build:
+  tags:
+    - ec2
+    - shell
+  stage: build
+  extends: .aws_oidc_auth
+  script:
+    - terraform plan -out "planfile"
+  artifacts:
+    paths:
+      - planfile
+
+
+.deploy:
+  tags:
+    - ec2
+    - shell
+  stage: deploy
+  extends: .aws_oidc_auth
+  script:
+    - aws configure list
+    # - terraform init
+    # - terraform state rm kubernetes_config_map.aws_auth || terraform import kubernetes_config_map.aws_auth kube-system/aws-auth || true
+    - terraform apply --auto-approve # -input=false  "planfile"
+    - aws eks describe-cluster --name $(terraform output -raw cluster_name) --region $(terraform output -raw aws_region)
+    - aws eks update-kubeconfig --name $(terraform output -raw cluster_name) --region $(terraform output -raw aws_region)
+    - kubectl get nodes
+    - kubectl get pods --all-namespaces
+  # when: manual
+
+
+destroy:
+  tags:
+    - ec2
+    - shell
+  stage: destroy
+  extends: .aws_oidc_auth
+  script:
+    # - terraform init
+    - helm uninstall metrics-server -n kube-system || true
+    - helm uninstall cluster-autoscaler -n kube-system || true
+    - helm uninstall aws-load-balancer-controller -n kube-system || true
+    - helm list -A || true
+
+    - kubectl auth can-i delete configmap/aws-auth -n kube-system || true
+    - kubectl delete namespace online-shop || true
+    - kubectl delete role namespace-viewer -n online-shop || true
+    - kubectl delete clusterrole cluster-viewer || true
+    - kubectl delete rolebinding namespace-viewer -n online-shop || true
+    - kubectl delete clusterrolebinding cluster-viewer || true
+    - kubectl delete configmap aws-auth -n kube-system || true
+
+    - terraform destroy --auto-approve  # -input=false  "planfile"
+  # when: manual
