@@ -74,6 +74,7 @@ module "eks" {
 
   # keep this ON so your current identity can reach the cluster initially
   enable_cluster_creator_admin_permissions = false
+  enable_irsa = true
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -84,8 +85,8 @@ module "eks" {
 
   eks_managed_node_groups = {
     dev = {
-      min_size       = 1
-      desired_size   = 1
+      min_size       = 2
+      desired_size   = 2
       max_size       = 2
       instance_types = ["t3.medium"]
     }
@@ -97,6 +98,25 @@ module "eks" {
 #############################################
 # EKS Blueprints Addons (UPDATED depends_on)
 #############################################
+module "ebs_csi_driver_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0"
+
+  role_name_prefix = "${var.name}-ebs-csi-"
+
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+
+  tags = var.tags
+}
+
+
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
   version = "~> 1.0"
@@ -108,16 +128,18 @@ module "eks_blueprints_addons" {
 
   eks_addons = {
     aws-ebs-csi-driver = {
-      most_recent = true
-      # optional: increase timeouts if you keep getting 20m timeout
+      most_recent              = true
+      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+
       timeouts = {
         create = "40m"
         update = "40m"
         delete = "40m"
       }
     }
-    coredns = { most_recent = true }
-    vpc-cni = { most_recent = true }
+
+    coredns    = { most_recent = true }
+    vpc-cni    = { most_recent = true }
     kube-proxy = { most_recent = true }
   }
 
