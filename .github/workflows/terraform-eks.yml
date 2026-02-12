@@ -62,9 +62,9 @@ jobs:
             -target=aws_eks_access_policy_association.k8s_admin \
             -target=aws_eks_access_policy_association.k8s_developer_view \
             -target=aws_eks_access_policy_association.github_actions_admin \
-            -target=aws_eks_access_policy_association.amir_admin
+            -target=aws_eks_access_policy_association.amir_admin \
             -out=infra.tfplan
-
+            
       ############################################################
       # 🔹 STEP 2 — Infra Apply
       ############################################################
