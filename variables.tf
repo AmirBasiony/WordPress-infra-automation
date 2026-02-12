@@ -26,6 +26,6 @@ variable public_subnet_cidr_blocks {
 }
 
 
-variable user_for_admin_role {}
-variable user_for_dev_role {}
-variable user_for_FullAdminAccess {}
+# variable user_for_admin_role {}
+# variable user_for_dev_role {}
+# variable user_for_FullAdminAccess {}
