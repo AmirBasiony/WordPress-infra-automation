@@ -37,6 +37,12 @@ jobs:
         # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
+      - name: Terraform State Debug
+        run: |
+          terraform workspace show
+          terraform providers
+          terraform state list || true
+          
       - name: Terraform Validate
         # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
