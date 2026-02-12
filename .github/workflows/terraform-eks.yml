@@ -47,19 +47,51 @@ jobs:
         # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -out tfplan -input=false -no-color
-        env:
-          TF_VAR_user_for_admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
-          TF_VAR_user_for_dev_role: ${{ secrets.TF_USER_FOR_DEV_ROLE }}
-          TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
+      ############################################################
+      # 🔹 STEP 1 — Infra Plan (VPC + EKS only)
+      ############################################################
+      - name: Terraform Plan (Infra Only)
+        run: |
+          terraform plan \
+            -target=module.vpc \
+            -target=module.eks \
+            -target=aws_eks_access_entry.k8s_admin \
+            -target=aws_eks_access_entry.k8s_developer \
+            -target=aws_eks_access_entry.github_actions \
+            -target=aws_eks_access_entry.amir \
+            -out=infra.tfplan
+
+      ############################################################
+      # 🔹 STEP 2 — Infra Apply
+      ############################################################
+      - name: Terraform Apply (Infra Only)
+        run: terraform apply -auto-approve infra.tfplan
+
+      ############################################################
+      # 🔹 STEP 3 — Full Plan (Platform + Helm + Kubernetes)
+      ############################################################
+      - name: Terraform Plan (Full)
+        run: terraform plan -out=platform.tfplan
+
+      ############################################################
+      # 🔹 STEP 4 — Full Apply
+      ############################################################
+      - name: Terraform Apply (Full)
+        run: terraform apply -auto-approve platform.tfplan
+        
+      # - name: Terraform Plan
+      #   run: terraform plan -out tfplan -input=false -no-color
+      #   env:
+      #     TF_VAR_user_for_admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
+      #     TF_VAR_user_for_dev_role: ${{ secrets.TF_USER_FOR_DEV_ROLE }}
+      #     TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
       
-      - name: Terraform Apply (main only)
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -input=false -auto-approve tfplan
-        env:
-          TF_VAR_user_for_admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
-          TF_VAR_user_for_dev_role: ${{ secrets.TF_USER_FOR_DEV_ROLE }}
-          TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
+      # - name: Terraform Apply (main only)
+      #   if: github.ref == 'refs/heads/main'
+      #   run: terraform apply -input=false -auto-approve tfplan
+      #   env:
+      #     TF_VAR_user_for_admin_role: ${{ secrets.TF_USER_FOR_ADMIN_ROLE }}
+      #     TF_VAR_user_for_dev_role: ${{ secrets.TF_USER_FOR_DEV_ROLE }}
+      #     TF_VAR_user_for_FullAdminAccess: ${{ secrets.TF_USER_FOR_FULLADMINACCESS }}
 
 
