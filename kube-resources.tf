@@ -21,7 +21,7 @@ provider "kubernetes" {
 #######################################################
 # Namespace
 #######################################################
-resource "kubernetes_namespace" "amir_wordpress" {
+resource "kubernetes_namespace_v1" "amir_wordpress" {
   metadata {
     name = "amir-wordpress"
   }
@@ -49,7 +49,7 @@ resource "kubernetes_config_map_v1" "aws_auth" {
 # RBAC
 # 1) eks-admins => cluster-admin (cluster-wide full access)
 #######################################################
-resource "kubernetes_cluster_role_binding" "eks_admins_cluster_admin" {
+resource "kubernetes_cluster_role_binding_v1" "eks_admins_cluster_admin" {
   metadata {
     name = "eks-admins-cluster-admin"
   }
@@ -73,10 +73,10 @@ resource "kubernetes_cluster_role_binding" "eks_admins_cluster_admin" {
 # 2) eks-readonly => view (namespace-only read access)
 #    (developer read access ONLY in amir-wordpress namespace)
 #######################################################
-resource "kubernetes_role_binding" "eks_readonly_ns" {
+resource "kubernetes_role_binding_v1" "eks_readonly_ns" {
   metadata {
     name      = "eks-readonly-view"
-    namespace = kubernetes_namespace.amir_wordpress.metadata[0].name
+    namespace = kubernetes_namespace_v1.amir_wordpress.metadata[0].name
   }
 
   role_ref {
@@ -91,5 +91,5 @@ resource "kubernetes_role_binding" "eks_readonly_ns" {
     api_group = "rbac.authorization.k8s.io"
   }
 
-  depends_on = [kubernetes_namespace.amir_wordpress]
+  depends_on = [kubernetes_namespace_v1.amir_wordpress]
 }

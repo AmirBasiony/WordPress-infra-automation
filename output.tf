@@ -31,18 +31,17 @@ output "aws_region" {
 }
 
 output "github_actions_role" {
-  description = "GitLab CI role for accessing the EKS cluster"
+  description = "GitHub actions role for accessing the EKS cluster"
   value = data.aws_iam_role.github_actions_role.arn
 }
 
 output "external_admin_role" {
   description = "ARN of the external admin IAM role"
-  value = aws_iam_role.external-admin.arn
+  value = data.aws_iam_user.k8s-admin.arn
 }
-
 output "external_developer_role" {
   description = "ARN of the external developer IAM role"
-  value = aws_iam_role.external-developer.arn
+  value = data.aws_iam_user.k8s-developer.arn
 }
 
 output "node_group_iam_role_arn" {
