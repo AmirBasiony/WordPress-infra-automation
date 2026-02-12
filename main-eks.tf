@@ -129,7 +129,7 @@ module "eks_blueprints_addons" {
   # - access entries ensure your runner identity can authenticate
   depends_on = [
     module.eks,
-    kubernetes_config_map_v1.aws_auth,
+    kubernetes_config_map_v1_data.aws_auth,
 
     aws_eks_access_entry.github_actions,
     aws_eks_access_policy_association.github_actions_admin,
