@@ -1,12 +1,4 @@
-locals {
-  aws_auth_node_roles = [
-    {
-      rolearn  = module.eks.eks_managed_node_groups["dev"].iam_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups   = ["system:bootstrappers", "system:nodes"]
-    }
-  ]
-}
+
 
 # This role is for amir-github-actions-deploy-role who need admin access to the EKS cluster
 data "aws_iam_role" "github_actions_role" {

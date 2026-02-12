@@ -47,7 +47,17 @@ resource "kubernetes_namespace_v1" "amir_wordpress" {
 #######################################################
 # aws-auth ConfigMap (NODES ONLY)
 #######################################################
-resource "kubernetes_config_map_v1" "aws_auth" {
+locals {
+  aws_auth_node_roles = [
+    {
+      rolearn  = module.eks.eks_managed_node_groups["dev"].iam_role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    }
+  ]
+}
+
+resource "kubernetes_config_map_v1_data" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
@@ -57,8 +67,12 @@ resource "kubernetes_config_map_v1" "aws_auth" {
     mapRoles = yamlencode(local.aws_auth_node_roles)
   }
 
+  # IMPORTANT: this tells Terraform “update/overwrite data in the existing configmap”
+  force = true
+
   depends_on = [module.eks]
 }
+
 
 #######################################################
 # RBAC
