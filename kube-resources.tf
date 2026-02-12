@@ -27,7 +27,7 @@ resource "kubernetes_namespace" "amir_wordpress" {
   depends_on = [
     module.eks,
     aws_eks_access_entry.Full_role_admin_Access,
-    kubernetes_config_map.aws_auth
+    kubernetes_config_map_v1.aws_auth
     ]
   
 }
@@ -36,7 +36,7 @@ resource "kubernetes_namespace" "amir_wordpress" {
 # Kubernetes config_map for aws-auth
 # This config_map is used to map IAM roles to Kubernetes users/groups
 #######################################################
-resource "kubernetes_config_map" "aws_auth" {
+resource "kubernetes_config_map_v1" "aws_auth" {
   metadata {
     name      = "aws-auth"
     namespace = "kube-system"
@@ -81,7 +81,7 @@ resource "kubernetes_role" "namespace-viewer" {
   depends_on = [
       module.eks,
       aws_eks_access_entry.Full_role_admin_Access,
-      kubernetes_config_map.aws_auth
+      kubernetes_config_map_v1.aws_auth
       ]
 }
 
@@ -107,7 +107,7 @@ resource "kubernetes_role_binding" "namespace-viewer" {
   depends_on = [
       module.eks,
       aws_eks_access_entry.Full_role_admin_Access,
-      kubernetes_config_map.aws_auth
+      kubernetes_config_map_v1.aws_auth
       ]
 }
 
@@ -133,7 +133,7 @@ resource "kubernetes_cluster_role" "cluster-viewer" {
   depends_on = [
       module.eks,
       aws_eks_access_entry.Full_role_admin_Access,
-      kubernetes_config_map.aws_auth
+      kubernetes_config_map_v1.aws_auth
       ]
 }
 
@@ -158,7 +158,7 @@ resource "kubernetes_cluster_role_binding" "cluster-viewer" {
   depends_on = [
       module.eks,
       aws_eks_access_entry.Full_role_admin_Access,
-      kubernetes_config_map.aws_auth
+      kubernetes_config_map_v1.aws_auth
       ]
 }
 
