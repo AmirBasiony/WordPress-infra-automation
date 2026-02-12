@@ -37,21 +37,17 @@ resource "helm_release" "argocd_apps" {
   name       = "argocd-apps"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argocd-apps"
-
-  namespace        = kubernetes_namespace_v1.argocd.metadata[0].name
-  create_namespace = false
+  namespace  = kubernetes_namespace_v1.argocd.metadata[0].name
 
   wait    = true
   timeout = 900
 
   values = [
     yamlencode({
-      applications = [
-        {
-          name      = "wordpress"
+      applications = {
+        wordpress = {
           namespace = "argocd"
-
-          project = "default"
+          project   = "default"
 
           source = {
             repoURL        = "https://github.com/AmirBasiony/K8s-GitOps-wordpress.git"
@@ -71,14 +67,15 @@ resource "helm_release" "argocd_apps" {
             }
             syncOptions = [
               "CreateNamespace=true",
-              "ApplyOutOfSyncOnly=true",
+              "ApplyOutOfSyncOnly=true"
             ]
           }
         }
-      ]
+      }
     })
   ]
 
-  # CRITICAL: ensure argocd (and its CRDs) exist before installing Applications
   depends_on = [helm_release.argocd]
 }
+
+
