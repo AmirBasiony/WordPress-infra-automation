@@ -57,7 +57,7 @@ resource "helm_release" "argocd_apps" {
 
           destination = {
             server    = "https://kubernetes.default.svc"
-            namespace = "wordpress"
+            namespace = kubernetes_namespace_v1.amir_wordpress.metadata[0].name
           }
 
           syncPolicy = {

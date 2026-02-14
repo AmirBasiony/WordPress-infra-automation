@@ -38,7 +38,7 @@ provider "kubernetes" {
 #######################################################
 resource "kubernetes_namespace_v1" "amir_wordpress" {
   metadata {
-    name = "amir-wordpress"
+    name = "wordpress"
   }
 
   depends_on = [module.eks]
