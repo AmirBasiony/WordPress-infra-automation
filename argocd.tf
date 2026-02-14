@@ -52,7 +52,7 @@ resource "helm_release" "argocd_apps" {
           source = {
             repoURL        = "https://github.com/AmirBasiony/K8s-GitOps-wordpress.git"
             targetRevision = "main"
-            path           = "wordpress/overlays/prod"
+            path           = "overlays/prod"
           }
 
           destination = {

@@ -90,6 +90,9 @@ module "eks" {
       max_size       = 2
       instance_types = ["t3.medium"]
     }
+    iam_role_additional_policies = {
+      ecr_readonly = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    }
   }
 
   tags = var.tags
