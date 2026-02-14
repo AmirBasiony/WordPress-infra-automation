@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "../K8s/GitOps-Wordpress"
+		},
+		{
+			"path": "."
+		}
+	]
+}

@@ -67,7 +67,8 @@ resource "helm_release" "argocd_apps" {
             }
             syncOptions = [
               "CreateNamespace=true",
-              "ApplyOutOfSyncOnly=true"
+              "ApplyOutOfSyncOnly=true",
+              "Replace=true"
             ]
           }
         }
