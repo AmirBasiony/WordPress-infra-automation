@@ -3,7 +3,7 @@ name: terraform-eks
 on:
   push:
     branches: ["main"]
-  # pull_request:
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -37,52 +37,54 @@ jobs:
         # working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
-      - name: Terraform State Debug
-        run: |
-          terraform workspace show
-          terraform providers
-          terraform state list || true
+      # - name: Terraform State Debug
+      #   run: |
+      #     terraform workspace show
+      #     terraform providers
+      #     terraform state list || true
           
-      - name: Terraform Validate
-        # working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform validate
+      # - name: Terraform Validate
+      #   # working-directory: ${{ env.TF_WORKING_DIR }}
+      #   run: terraform validate
 
-      ############################################################
-      # 🔹 STEP 1 — Infra Plan (VPC + EKS only)
-      ############################################################
-      - name: Terraform Plan (Infra Only)
-        run: |
-          terraform plan \
-            -target=module.vpc \
-            -target=module.eks \
-            -target=aws_eks_access_entry.k8s_admin \
-            -target=aws_eks_access_entry.k8s_developer \
-            -target=aws_eks_access_entry.github_actions \
-            -target=aws_eks_access_entry.amir \
-            -target=aws_eks_access_policy_association.k8s_admin \
-            -target=aws_eks_access_policy_association.k8s_developer_view \
-            -target=aws_eks_access_policy_association.github_actions_admin \
-            -target=aws_eks_access_policy_association.amir_admin \
-            -out=infra.tfplan
+      # ############################################################
+      # # 🔹 STEP 1 — Infra Plan (VPC + EKS only)
+      # ############################################################
+      # - name: Terraform Plan (Infra Only)
+      #   run: |
+      #     terraform plan \
+      #       -target=module.vpc \
+      #       -target=module.eks \
+      #       -target=aws_eks_access_entry.k8s_admin \
+      #       -target=aws_eks_access_entry.k8s_developer \
+      #       -target=aws_eks_access_entry.github_actions \
+      #       -target=aws_eks_access_entry.amir \
+      #       -target=aws_eks_access_policy_association.k8s_admin \
+      #       -target=aws_eks_access_policy_association.k8s_developer_view \
+      #       -target=aws_eks_access_policy_association.github_actions_admin \
+      #       -target=aws_eks_access_policy_association.amir_admin \
+      #       -out=infra.tfplan
             
-      ############################################################
-      # 🔹 STEP 2 — Infra Apply
-      ############################################################
-      - name: Terraform Apply (Infra Only)
-        run: terraform apply -auto-approve infra.tfplan
+      # ############################################################
+      # # 🔹 STEP 2 — Infra Apply
+      # ############################################################
+      # - name: Terraform Apply (Infra Only)
+      #   run: terraform apply -auto-approve infra.tfplan
 
-      ############################################################
-      # 🔹 STEP 3 — Full Plan (Platform + Helm + Kubernetes)
-      ############################################################
-      - name: Terraform Plan (Full)
-        run: terraform plan -out=platform.tfplan
+      # ############################################################
+      # # 🔹 STEP 3 — Full Plan (Platform + Helm + Kubernetes)
+      # ############################################################
+      # - name: Terraform Plan (Full)
+      #   run: terraform plan -out=platform.tfplan
 
-      ############################################################
-      # 🔹 STEP 4 — Full Apply
-      ############################################################
-      - name: Terraform Apply (Full)
-        run: terraform apply -auto-approve platform.tfplan
-        
+      # ############################################################
+      # # 🔹 STEP 4 — Full Apply
+      # ############################################################
+      # - name: Terraform Apply (Full)
+      #   run: terraform apply -auto-approve platform.tfplan
+
+      - name: Terraform Destroy (Full)
+        run: terraform destroy -auto-approve
       # - name: Terraform Plan
       #   run: terraform plan -out tfplan -input=false -no-color
       #   env:
