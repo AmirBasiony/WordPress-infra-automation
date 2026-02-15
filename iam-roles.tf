@@ -26,8 +26,8 @@ data "aws_iam_user" "k8s-developer" {
   user_name= "k8s-developer"
 }
 
-data "aws_iam_user" "eso_wp_role" {
-  user_name= "ESO-WP-ROLE "
+data "aws_iam_role" "eso_wp_role" {
+  name= "ESO-WP-ROLE "
 }
 
 # This role is for external admin who need cluster viewer access to the EKS cluster
