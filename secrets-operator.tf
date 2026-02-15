@@ -15,7 +15,7 @@ resource "helm_release" "external_secrets" {
       }
       serviceAccount = {
         create = true
-        name   = "external-secrets-sa"
+        name   = kubernetes_service_account_v1.external_secrets_sa.name
       }
     })
   ]

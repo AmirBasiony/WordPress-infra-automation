@@ -1,18 +1,6 @@
 #############################################
 # helm provider (UPDATED)
 #############################################
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.eks.cluster_endpoint
-#     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-#     exec {
-#       command     = "aws"
-#       api_version = "client.authentication.k8s.io/v1beta1"
-#       args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region]
-#     }
-#   }
-# }
 provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
@@ -62,7 +50,7 @@ module "vpc" {
 }
 
 #############################################
-# EKS Cluster (UPDATED)
+# EKS Cluster
 #############################################
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"

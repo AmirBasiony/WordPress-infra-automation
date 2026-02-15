@@ -5,18 +5,6 @@
 # - RBAC binds to GROUPS: eks-admins, eks-readonly
 # - Developer is namespace-only read access
 #############################################
-
-# Provider block for Kubernetes (uses aws eks get-token)
-# provider "kubernetes" {
-#   host                   = module.eks.cluster_endpoint
-#   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-#   exec {
-#     command     = "aws"
-#     api_version = "client.authentication.k8s.io/v1beta1"
-#     args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.aws_region]
-#   }
-# }
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -121,4 +109,24 @@ resource "kubernetes_role_binding_v1" "eks_readonly_ns" {
   }
 
   depends_on = [kubernetes_namespace_v1.amir_wordpress]
+}
+
+
+############################################################
+##### Create a Service Account for the external secrets ####
+############################################################
+resource "kubernetes_service_account_v1" "external_secrets_sa" {
+  metadata {
+    name      = "external-secrets-sa"
+    namespace = kubernetes_namespace_v1.amir_wordpress.metadata[0].name
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = data.aws_iam_role.eso_wp_role.arn
+    }
+  }
+
+  depends_on = [
+    module.eks,
+    aws_iam_role_policy_attachment.eso_wp_attach
+  ]
 }
