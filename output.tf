@@ -47,3 +47,7 @@ output "external_developer_role" {
 output "node_group_iam_role_arn" {
   value = module.eks.eks_managed_node_groups["dev"].iam_role_arn
 }
+
+output "eso_wp_role_arn" {
+  value = data.aws_iam_role.eso_wp_role.arn
+}
